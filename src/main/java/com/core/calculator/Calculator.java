@@ -24,7 +24,7 @@ public class Calculator {
 
     public void acceptNum(float num) throws InvalidCommandException, CalculateException {
         if (!this.isWaitingNum) {
-            throw new InvalidCommandException();
+            throw new InvalidCommandException("cannot accept number");
         }
         lastNum = num;
         result = calc(result, lastNum, getOp());
@@ -33,7 +33,7 @@ public class Calculator {
 
     public void acceptOp(Operator op) throws InvalidCommandException {
         if (this.isWaitingNum || op == null) {
-            throw new InvalidCommandException();
+            throw new InvalidCommandException("cannot accept operation, waiting for a number to accept");
         }
         lastOp = op;
         this.isWaitingNum = true;
@@ -44,8 +44,11 @@ public class Calculator {
     }
 
     public void redo() throws InvalidCommandException, CalculateException {
-        if (isWaitingNum || lastOp == null) {
-            throw new InvalidCommandException();
+        if (lastOp == null) {
+            return;
+        }
+        if (isWaitingNum) {
+            throw new InvalidCommandException("cannot redo, waiting for a number to accept");
         }
         result = calc(result, lastNum, getOp());
     }
@@ -66,10 +69,13 @@ public class Calculator {
             return num1 - num2;
         } else if (op == Operator.mul) {
             return num1 * num2;
-        } else if (op == Operator.div && num2 != 0) {
+        } else if (op == Operator.div) {
+            if (num2 == 0) {
+                throw new CalculateException("cannot divide zero");
+            }
             return num1 / num2;
         } else {
-            throw new CalculateException();
+            throw new CalculateException("unknown operation");
         }
     }
 }
